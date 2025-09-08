@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopKart - E-commerce SPA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .navbar {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 15px;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    .logo { font-size: 1.5rem; font-weight: bold; color: #667eea; }
+    .nav-links { display: flex; gap: 1rem; }
+    .nav-btn {
+      background: #667eea; color: white; border: none;
+      padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .nav-btn:hover { background: #5a6fd8; transform: translateY(-2px); }
+    .page {
+      display: none;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    .page.active { display: block; }
+    .form-container { max-width: 400px; margin: 0 auto; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 0.75rem; border: 2px solid #e1e1e1;
+      border-radius: 8px; transition: border-color 0.3s ease;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none; border-color: #667eea;
+    }
+    .btn {
+      background: #667eea; color: white; border: none;
+      padding: 0.75rem 1.5rem; border-radius: 8px;
+      cursor: pointer; font-size: 1rem; transition: all 0.3s ease; width: 100%;
+    }
+    .btn:hover { background: #5a6fd8; transform: translateY(-2px); }
+    .btn-danger { background: #dc3545; }
+    .btn-danger:hover { background: #c82333; }
+    .filters { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .filter-group { flex: 1; min-width: 200px; }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .product-card {
+      background: white; border-radius: 12px; padding: 1rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      text-align: center;
+    }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); }
+    .product-img {
+      width: 100%; height: 180px; object-fit: cover;
+      border-radius: 8px; margin-bottom: 1rem;
+    }
+    .product-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem; color: #333; }
+    .product-price { font-size: 1.1rem; color: #667eea; font-weight: bold; margin-bottom: 0.5rem; }
+    .product-category { color: #666; font-size: 0.9rem; margin-bottom: 1rem; }
+    .product-description { color: #888; font-size: 0.85rem; margin-bottom: 1rem; text-align: left; }
+    .cart-item {
+      display: flex; gap: 1rem;
+      padding: 1rem; border: 1px solid #e1e1e1;
+      border-radius: 8px; margin-bottom: 1rem; background: white;
+      align-items: center;
+    }
+    .cart-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+    .cart-item-info { flex: 1; }
+    .cart-item-controls { display: flex; gap: 0.5rem; align-items: center; }
+    .quantity-btn {
+      background: #667eea; color: white; border: none;
+      width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+      font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+    }
+    .cart-total { text-align: right; font-size: 1.5rem; font-weight: bold; color: #667eea; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #e1e1e1; }
+    .cart-badge {
+      background: #dc3545; color: white; border-radius: 50%;
+      padding: 0.2rem 0.5rem; font-size: 0.8rem; margin-left: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="navbar">
+      <div class="logo">🛒 ShopKart</div>
+      <div class="nav-links" id="navLinks"></div>
+    </nav>
+
+    <!-- Login -->
+    <div id="loginPage" class="page">
+      <div class="form-container">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Login</h2>
+        <div id="loginMessage"></div>
+        <form onsubmit="login(event)">
+          <div class="form-group"><label>Email:</label><input type="email" id="loginEmail" required></div>
+          <div class="form-group"><label>Password:</label><input type="password" id="loginPassword" required></div>
+          <button type="submit" class="btn">Login</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Signup -->
+    <div id="signupPage" class="page">
+      <div class="form-container">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Sign Up</h2>
+        <div id="signupMessage"></div>
+        <form onsubmit="signup(event)">
+          <div class="form-group"><label>Name:</label><input type="text" id="signupName" required></div>
+          <div class="form-group"><label>Email:</label><input type="email" id="signupEmail" required></div>
+          <div class="form-group"><label>Password:</label><input type="password" id="signupPassword" required></div>
+          <button type="submit" class="btn">Sign Up</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div id="productsPage" class="page">
+      <h2 style="margin-bottom: 2rem;">Products</h2>
+      <div class="filters">
+        <div class="filter-group">
+          <label>Category:</label>
+          <select id="categoryFilter" onchange="filterProducts()"><option value="">All</option></select>
+        </div>
+        <div class="filter-group"><label>Min Price (₹):</label><input type="number" id="minPrice" step="100" onchange="filterProducts()"></div>
+        <div class="filter-group"><label>Max Price (₹):</label><input type="number" id="maxPrice" step="100" onchange="filterProducts()"></div>
+      </div>
+      <div id="productsGrid" class="products-grid"></div>
+    </div>
+
+    <!-- Cart -->
+    <div id="cartPage" class="page">
+      <h2 style="margin-bottom: 2rem;">Shopping Cart</h2>
+      <div id="cartItems"></div>
+      <div id="cartTotal" class="cart-total"></div>
+    </div>
+  </div>
+
+  <script>
+    // Users with default admin
+    let users = [
+      { id: 1, name: "Admin", email: "admin@example.com", password: "admin123", isAdmin: true }
+    ];
+
+    // Enhanced Products with Indian context and INR pricing
+    let products = [
+      // Electronics
+      { id: 1, name: "Apple MacBook Air M2", price: 114900, category: "Electronics", description: "13.6-inch Liquid Retina display, Apple M2 chip, 8GB RAM, 256GB SSD", image: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=400&h=300&fit=crop" },
+      { id: 2, name: "Samsung Galaxy S24 Ultra", price: 129999, category: "Electronics", description: "6.8-inch Dynamic AMOLED, 256GB, 12GB RAM, S Pen included", image: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=400&h=300&fit=crop" },
+      { id: 3, name: "Sony WH-1000XM5 Headphones", price: 29990, category: "Electronics", description: "Industry-leading noise canceling, 30-hour battery life", image: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&h=300&fit=crop" },
+      { id: 4, name: "iPad Pro 11-inch", price: 71900, category: "Electronics", description: "M2 chip, 128GB, Wi-Fi, Liquid Retina display", image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop" },
+      { id: 5, name: "Canon EOS R50 Camera", price: 54995, category: "Electronics", description: "24.2MP APS-C CMOS sensor, 4K video recording", image: "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=400&h=300&fit=crop" },
+      { id: 6, name: "Dell XPS 13 Laptop", price: 89990, category: "Electronics", description: "13.4-inch FHD+, Intel Core i5, 8GB RAM, 512GB SSD", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop" },
+      
+      // Home Appliances
+      { id: 7, name: "LG 43-inch 4K Smart TV", price: 32990, category: "Home Appliances", description: "webOS, HDR10 Pro, AI ThinQ, Magic Remote", image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&h=300&fit=crop" },
+      { id: 8, name: "Whirlpool 7.5kg Washing Machine", price: 24500, category: "Home Appliances", description: "Front load, 6th Sense technology, steam care", image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop" },
+      { id: 9, name: "Philips Coffee Maker", price: 8999, category: "Home Appliances", description: "12-cup programmable, auto shut-off, permanent filter", image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop" },
+      { id: 10, name: "Bajaj Air Fryer 4L", price: 5999, category: "Home Appliances", description: "Digital touch panel, 8 preset menus, oil-free cooking", image: "https://images.unsplash.com/photo-1585515656642-87bb3d4bfbbc?w=400&h=300&fit=crop" },
+      { id: 11, name: "Godrej 236L Refrigerator", price: 18990, category: "Home Appliances", description: "3-star rating, direct cool, vegetable crisper", image: "https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=400&h=300&fit=crop" },
+      
+      // Fashion & Clothing
+      { id: 12, name: "Levi's Men's 511 Slim Jeans", price: 3999, category: "Fashion", description: "Mid-rise, slim fit, cotton blend, classic 5-pocket styling", image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=300&fit=crop" },
+      { id: 13, name: "Nike Air Max 270 Sneakers", price: 12795, category: "Fashion", description: "Max Air unit, breathable mesh upper, lifestyle running shoe", image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=300&fit=crop" },
+      { id: 14, name: "Uniqlo Cotton T-Shirt", price: 999, category: "Fashion", description: "100% cotton, crew neck, regular fit, machine washable", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop" },
+      { id: 15, name: "Zara Women's Denim Jacket", price: 4590, category: "Fashion", description: "Classic collar, front pockets, button fastening", image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=400&h=300&fit=crop" },
+      { id: 16, name: "Adidas Ultraboost 22 Running Shoes", price: 16999, category: "Fashion", description: "BOOST midsole, Primeknit upper, Continental rubber outsole", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop" },
+      
+      // Books & Education
+      { id: 17, name: "Think and Grow Rich - Napoleon Hill", price: 299, category: "Books", description: "Classic self-help book, personal development, success principles", image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=300&fit=crop" },
+      { id: 18, name: "The Alchemist - Paulo Coelho", price: 350, category: "Books", description: "Philosophical novel, bestselling book, inspirational story", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop" },
+      { id: 19, name: "Wings of Fire - APJ Abdul Kalam", price: 199, category: "Books", description: "Autobiography, inspiration, Indian scientist and president", image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop" },
+      { id: 20, name: "Rich Dad Poor Dad - Robert Kiyosaki", price: 399, category: "Books", description: "Financial literacy, investment guide, money management", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=300&fit=crop" },
+      
+      // Sports & Fitness
+      { id: 21, name: "Decathlon Yoga Mat 8mm", price: 1299, category: "Sports & Fitness", description: "Non-slip surface, comfortable thickness, eco-friendly", image: "https://images.unsplash.com/photo-1506629905607-21e2a38671db?w=400&h=300&fit=crop" },
+      { id: 22, name: "Cosco Cricket Bat", price: 2500, category: "Sports & Fitness", description: "English willow, lightweight, professional grade", image: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400&h=300&fit=crop" },
+      { id: 23, name: "Nivia Football Size 5", price: 899, category: "Sports & Fitness", description: "FIFA approved, synthetic leather, machine stitched", image: "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=400&h=300&fit=crop" },
+      { id: 24, name: "Gym Dumbbell Set 20kg", price: 3999, category: "Sports & Fitness", description: "Adjustable weight, rubber coating, includes plates", image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop" },
+      
+      // Beauty & Personal Care
+      { id: 25, name: "Lakme Absolute Lipstick", price: 825, category: "Beauty", description: "Matte finish, long-lasting, vitamin E enriched", image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=300&fit=crop" },
+      { id: 26, name: "The Body Shop Tea Tree Face Wash", price: 995, category: "Beauty", description: "Oil control, deep cleansing, suitable for oily skin", image: "https://images.unsplash.com/photo-1556228578-dd6f957c1efa?w=400&h=300&fit=crop" },
+      { id: 27, name: "Philips Hair Dryer", price: 1999, category: "Beauty", description: "1600W, ionic care, multiple heat settings", image: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&h=300&fit=crop" },
+      { id: 28, name: "Gillette Fusion5 Razor", price: 399, category: "Beauty", description: "5-blade technology, precision trimmer, ergonomic handle", image: "https://images.unsplash.com/photo-1503066878047-e9f6519d7c6a?w=400&h=300&fit=crop" }
+    ];
+
+    let currentUser = null;
+    let cart = {};
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadCart();
+      showLogin();
+    });
+
+    // Auth
+    function login(e) {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      const user = users.find(u => u.email === email && u.password === password);
+      if (user) {
+        currentUser = user;
+        updateNavigation();
+        showProducts();
+      } else {
+        document.getElementById("loginMessage").innerHTML = `<div style="color:red;">Invalid credentials</div>`;
+      }
+    }
+    function signup(e) {
+      e.preventDefault();
+      const name = document.getElementById("signupName").value;
+      const email = document.getElementById("signupEmail").value;
+      const password = document.getElementById("signupPassword").value;
+      if (users.find(u => u.email === email)) {
+        document.getElementById("signupMessage").innerHTML = `<div style="color:red;">Email already exists</div>`;
+        return;
+      }
+      const newUser = { id: users.length + 1, name, email, password, isAdmin: false };
+      users.push(newUser);
+      document.getElementById("signupMessage").innerHTML = `<div style="color:green;">Account created, please login</div>`;
+      setTimeout(showLogin, 1000);
+    }
+    function logout() {
+      currentUser = null;
+      updateNavigation();
+      showLogin();
+    }
+
+    // Navigation
+    function updateNavigation() {
+      const nav = document.getElementById("navLinks");
+      if (currentUser) {
+        nav.innerHTML = `
+          <span>Welcome, ${currentUser.name}</span>
+          <button class="nav-btn" onclick="showProducts()">Products</button>
+          <button class="nav-btn" onclick="showCart()">Cart <span class="cart-badge">${getCartCount()}</span></button>
+          <button class="nav-btn" onclick="logout()">Logout</button>
+        `;
+      } else {
+        nav.innerHTML = `
+          <button class="nav-btn" onclick="showLogin()">Login</button>
+          <button class="nav-btn" onclick="showSignup()">Signup</button>
+        `;
+      }
+    }
+
+    // Page control
+    function showPage(id) {
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+    function showLogin() { showPage("loginPage"); }
+    function showSignup() { showPage("signupPage"); }
+    function showProducts() { showPage("productsPage"); displayProducts(products); updateCategoryFilter(); }
+    function showCart() { showPage("cartPage"); displayCart(); }
+
+    // Products
+    function displayProducts(list) {
+      const grid = document.getElementById("productsGrid");
+      grid.innerHTML = "";
+      list.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "product-card";
+        div.innerHTML = `
+          <img src="${p.image}" alt="${p.name}" class="product-img">
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
+          <div class="product-category">${p.category}</div>
+          <div class="product-description">${p.description}</div>
+          <button class="btn" onclick="addToCart(${p.id})">Add to Cart</button>
+        `;
+        grid.appendChild(div);
+      });
+    }
+    function updateCategoryFilter() {
+      const select = document.getElementById("categoryFilter");
+      const cats = [...new Set(products.map(p => p.category))];
+      select.innerHTML = "<option value=''>All</option>";
+      cats.forEach(c => { const opt = document.createElement("option"); opt.value = c; opt.textContent = c; select.appendChild(opt); });
+    }
+    function filterProducts() {
+      const cat = document.getElementById("categoryFilter").value;
+      const min = parseFloat(document.getElementById("minPrice").value) || 0;
+      const max = parseFloat(document.getElementById("maxPrice").value) || Infinity;
+      const filtered = products.filter(p => (!cat || p.category === cat) && p.price >= min && p.price <= max);
+      displayProducts(filtered);
+    }
+
+    // Cart
+    function addToCart(pid) {
+      if (!cart[currentUser.id]) cart[currentUser.id] = {};
+      if (!cart[currentUser.id][pid]) cart[currentUser.id][pid] = { ...products.find(p => p.id === pid), quantity: 0 };
+      cart[currentUser.id][pid].quantity++;
+      saveCart();
+      updateNavigation();
+    }
+    function removeFromCart(pid) {
+      delete cart[currentUser.id][pid];
+      saveCart();
+      displayCart();
+      updateNavigation();
+    }
+    function changeQty(pid, d) {
+      cart[currentUser.id][pid].quantity += d;
+      if (cart[currentUser.id][pid].quantity <= 0) removeFromCart(pid);
+      saveCart();
+      displayCart();
+      updateNavigation();
+    }
+    function displayCart() {
+      const itemsDiv = document.getElementById("cartItems");
+      const totalDiv = document.getElementById("cartTotal");
+      const userCart = cart[currentUser.id] || {};
+      itemsDiv.innerHTML = "";
+      let total = 0;
+      Object.values(userCart).forEach(item => {
+        total += item.price * item.quantity;
+        const div = document.createElement("div");
+        div.className = "cart-item";
+        div.innerHTML = `
+          <img src="${item.image}" alt="${item.name}">
+          <div class="cart-item-info">
+            <div class="product-name">${item.name}</div>
+            <div class="product-price">₹${item.price.toLocaleString('en-IN')} each</div>
+            <div>Subtotal: ₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
+          </div>
+          <div class="cart-item-controls">
+            <button class="quantity-btn" onclick="changeQty(${item.id}, -1)">-</button>
+            <span>${item.quantity}</span>
+            <button class="quantity-btn" onclick="changeQty(${item.id}, 1)">+</button>
+            <button class="btn btn-danger" onclick="removeFromCart(${item.id})">Remove</button>
+          </div>
+        `;
+        itemsDiv.appendChild(div);
+      });
+      totalDiv.innerHTML = total ? `Total: ₹${total.toLocaleString('en-IN')}` : "";
+    }
+    function getCartCount() {
+      if (!currentUser || !cart[currentUser.id]) return 0;
+      return Object.values(cart[currentUser.id]).reduce((s, i) => s + i.quantity, 0);
+    }
+    function saveCart() { localStorage.setItem("cart", JSON.stringify(cart)); }
+    function loadCart() { cart = JSON.parse(localStorage.getItem("cart")) || {}; }
+  </script>
+</body>
+</html>
